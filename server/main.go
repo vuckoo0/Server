@@ -38,6 +38,7 @@ func handleConn(conn net.Conn) {
 
 		if message == "exit()" {
 			log.Printf("[.] Client is disconecting...")
+			break
 		}
 
 		_, err = conn.Write([]byte("ok"))
@@ -55,7 +56,6 @@ func main() {
 		log.Fatal("[-] Server didnt start properly")
 	}
 
-	log.Default()
 	fmt.Println("[+] Oppend server on port 8080...")
 
 	for {
