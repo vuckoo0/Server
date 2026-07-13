@@ -32,6 +32,13 @@ func main() {
 
 	defer conn.Close()
 
+	username := readLine("[+] Enter the username that will be used to identify you on the server: ")
+
+	_, err = conn.Write([]byte(username))
+	if err != nil {
+		fmt.Println("[-] Error in sending the username to the server")
+	}
+
 	for {
 
 		message := readLine("[+] Enter a message for the server: ")

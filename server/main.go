@@ -9,12 +9,11 @@ import (
 )
 
 var (
-	buffer = make([]byte, 1024)
+	buffer      = make([]byte, 1024)
+	activeUsers = map[net.Addr]string{}
 )
 
 func handleConn(conn net.Conn) {
-
-	fmt.Printf("[+] Accepted a connection form %v\n", conn.LocalAddr())
 
 	defer conn.Close()
 
@@ -25,16 +24,16 @@ func handleConn(conn net.Conn) {
 
 			if errors.Is(err, io.EOF) {
 
-				fmt.Printf("[-] Client %v disconected\n", conn.LocalAddr())
+				fmt.Printf("[-][%s] Client unexpectedly disconected\n", activeUsers[conn.RemoteAddr()])
 
 			} else {
 
-				fmt.Printf("[-] Error in reading from the client %v: %e", conn.LocalAddr(), err)
+				fmt.Printf("[-][%s] Error in reading from the client %v: %e", activeUsers[conn.RemoteAddr()], conn.RemoteAddr(), err)
 			}
 		}
 
 		message := string(buffer[:n])
-		log.Printf("[%v] %v\n", conn.LocalAddr(), message)
+		log.Printf("[%s] %v\n", activeUsers[conn.RemoteAddr()], message)
 
 		if message == "exit()" {
 			log.Printf("[.] Client is disconecting...")
@@ -43,7 +42,7 @@ func handleConn(conn net.Conn) {
 
 		_, err = conn.Write([]byte("ok"))
 		if err != nil {
-			log.Fatal("Error in sending message to the server: ", err)
+			log.Fatal("[-] Error in sending message to the server: ", err)
 		}
 	}
 }
@@ -65,6 +64,17 @@ func main() {
 		if err != nil {
 			continue
 		}
+
+		n, err := conn.Read(buffer)
+		if err != nil {
+			fmt.Println("[-] Error in username obtaning")
+			continue
+		}
+
+		username := string(buffer[:n])
+		activeUsers[conn.RemoteAddr()] = username
+
+		fmt.Printf("[+][Addr: %v] Accepted a connection form %s\n", conn.RemoteAddr(), username)
 
 		go handleConn(conn)
 	}
