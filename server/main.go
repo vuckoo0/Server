@@ -36,7 +36,7 @@ func handleConn(conn net.Conn) {
 		log.Printf("[%s] %v\n", activeUsers[conn.RemoteAddr()], message)
 
 		if message == "exit()" {
-			log.Printf("[.] Client is disconecting...")
+			log.Printf("[.][%s] Client is disconecting...", activeUsers[conn.RemoteAddr()])
 			break
 		}
 
