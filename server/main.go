@@ -9,9 +9,14 @@ import (
 )
 
 var (
-	buffer      = make([]byte, 1024)
-	activeUsers = map[net.Addr]string{}
+	buffer        = make([]byte, 1024)
+	activeUsers   = map[net.Addr]string{}
+	messageChanel = make(chan string)
 )
+
+func recorder() {
+
+}
 
 func handleConn(conn net.Conn) {
 
