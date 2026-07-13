@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"main/server/recorder"
 	"net"
 )
 
@@ -13,10 +14,6 @@ var (
 	activeUsers   = map[net.Addr]string{}
 	messageChanel = make(chan string)
 )
-
-func recorder() {
-
-}
 
 func handleConn(conn net.Conn) {
 
@@ -45,6 +42,8 @@ func handleConn(conn net.Conn) {
 			break
 		}
 
+		messageChanel <- message
+
 		_, err = conn.Write([]byte("ok"))
 		if err != nil {
 			log.Fatal("[-] Error in sending message to the server: ", err)
@@ -54,13 +53,15 @@ func handleConn(conn net.Conn) {
 
 func main() {
 
+	go recorder.Recorder(messageChanel)
+
 	server, err := net.Listen("tcp", ":8080")
 
 	if err != nil {
 		log.Fatal("[-] Server didnt start properly")
 	}
 
-	fmt.Println("[+] Oppend server on port 8080...")
+	fmt.Println("[+] Opened server on port 8080...")
 
 	for {
 
