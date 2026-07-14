@@ -2,7 +2,6 @@ package recorder
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -34,6 +33,6 @@ func Recorder(messages chan Row, database *sql.DB) {
 			log.Fatal(err)
 		}
 		id, _ := res.LastInsertId()
-		fmt.Println("[+] Inserted ID:", id)
+		log.Println("[+] Inserted ID:", id)
 	}
 }

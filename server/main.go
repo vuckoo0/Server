@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"main/server/recorder"
@@ -30,11 +29,11 @@ func handleConn(conn net.Conn) {
 
 			if errors.Is(err, io.EOF) {
 
-				fmt.Printf("[-][%s] Client unexpectedly disconected\n", activeUsers[conn.RemoteAddr()])
+				log.Printf("[-][%s] Client unexpectedly disconected\n", activeUsers[conn.RemoteAddr()])
 
 			} else {
 
-				fmt.Printf("[-][%s] Error in reading from the client %v: %e", activeUsers[conn.RemoteAddr()], conn.RemoteAddr(), err)
+				log.Printf("[-][%s] Error in reading from the client %v: %e", activeUsers[conn.RemoteAddr()], conn.RemoteAddr(), err)
 			}
 		}
 
@@ -79,7 +78,7 @@ func main() {
 		log.Fatal("[-] Server didnt start properly")
 	}
 
-	fmt.Println("[+] Opened server on port 8080...")
+	log.Println("[+] Opened server on port 8080...")
 
 	for {
 
@@ -91,14 +90,14 @@ func main() {
 
 		n, err := conn.Read(buffer)
 		if err != nil {
-			fmt.Println("[-] Error in username obtaning")
+			log.Println("[-] Error in username obtaning")
 			continue
 		}
 
 		username := string(buffer[:n])
 		activeUsers[conn.RemoteAddr()] = username
 
-		fmt.Printf("[+][Addr: %v] Accepted a connection form %s\n", conn.RemoteAddr(), username)
+		log.Printf("[+][Addr: %v] Accepted a connection form %s\n", conn.RemoteAddr(), username)
 
 		go handleConn(conn)
 	}
