@@ -19,19 +19,21 @@ func Recorder(messages chan Row, database *sql.DB) {
 
 	defer database.Close()
 
-	currentRow := <-messages
+	for {
+		currentRow := <-messages
 
-	res, err := database.Exec(
-		"insert into first_table(`user`, ip, `time`, message) values (?, ?, ?, ?)",
-		currentRow.User,
-		currentRow.Ip,
-		currentRow.Time,
-		currentRow.Message,
-	)
+		res, err := database.Exec(
+			"insert into first_table(`user`, ip, `time`, message) values (?, ?, ?, ?)",
+			currentRow.User,
+			currentRow.Ip,
+			currentRow.Time,
+			currentRow.Message,
+		)
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
+		id, _ := res.LastInsertId()
+		fmt.Println("[+] Inserted ID:", id)
 	}
-	id, _ := res.LastInsertId()
-	fmt.Println("[+] Inserted ID:", id)
 }
