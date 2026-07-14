@@ -1,11 +1,37 @@
 package recorder
 
-import "fmt"
+import (
+	"database/sql"
+	"fmt"
+	"log"
 
-func Recorder(messages chan string) {
+	_ "github.com/go-sql-driver/mysql"
+)
 
-	for {
+type Row struct {
+	User    string
+	Ip      string
+	Time    string
+	Message string
+}
 
-		fmt.Println(<-messages)
+func Recorder(messages chan Row, database *sql.DB) {
+
+	defer database.Close()
+
+	currentRow := <-messages
+
+	res, err := database.Exec(
+		"insert into first_table(`user`, ip, `time`, message) values (?, ?, ?, ?)",
+		currentRow.User,
+		currentRow.Ip,
+		currentRow.Time,
+		currentRow.Message,
+	)
+
+	if err != nil {
+		log.Fatal(err)
 	}
+	id, _ := res.LastInsertId()
+	fmt.Println("[+] Inserted ID:", id)
 }

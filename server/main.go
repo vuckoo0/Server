@@ -1,23 +1,27 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"main/server/recorder"
 	"net"
+	"time"
 )
 
 var (
 	buffer        = make([]byte, 1024)
 	activeUsers   = map[net.Addr]string{}
-	messageChanel = make(chan string)
+	messageChanel = make(chan recorder.Row)
 )
 
 func handleConn(conn net.Conn) {
 
 	defer conn.Close()
+
+	currentRow := new(recorder.Row)
 
 	for {
 
@@ -34,15 +38,19 @@ func handleConn(conn net.Conn) {
 			}
 		}
 
-		message := string(buffer[:n])
-		log.Printf("[%s] %v\n", activeUsers[conn.RemoteAddr()], message)
+		currentRow.Message = string(buffer[:n])
+		currentRow.Ip = conn.RemoteAddr().String()
+		currentRow.User = activeUsers[conn.RemoteAddr()]
+		currentRow.Time = time.Now().Format("2006-01-02 15:04:05")
 
-		if message == "exit()" {
+		messageChanel <- *currentRow
+
+		if currentRow.Message == "exit()" {
 			log.Printf("[.][%s] Client is disconecting...", activeUsers[conn.RemoteAddr()])
 			break
 		}
 
-		messageChanel <- message
+		log.Printf("[%s] %v\n", activeUsers[conn.RemoteAddr()], currentRow.Message)
 
 		_, err = conn.Write([]byte("ok"))
 		if err != nil {
@@ -53,7 +61,17 @@ func handleConn(conn net.Conn) {
 
 func main() {
 
-	go recorder.Recorder(messageChanel)
+	db, err := sql.Open("mysql", "root:Vucko1602!@tcp(localhost:3306)/first_db")
+	if err != nil {
+		log.Fatal("[-] Error in opening database: ", err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatal("[-] Error in pinging database: ", err)
+	}
+
+	go recorder.Recorder(messageChanel, db)
 
 	server, err := net.Listen("tcp", ":8080")
 
