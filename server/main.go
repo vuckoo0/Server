@@ -7,7 +7,10 @@ import (
 	"log"
 	"main/server/recorder"
 	"net"
+	"os"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -60,7 +63,13 @@ func handleConn(conn net.Conn) {
 
 func main() {
 
-	db, err := sql.Open("mysql", "root:Vucko1602!@tcp(localhost:3306)/first_db")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file: ", err)
+	}
+
+	dsn := os.Getenv("DSN")
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal("[-] Error in opening database: ", err)
 	}
