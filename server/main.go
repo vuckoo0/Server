@@ -68,7 +68,7 @@ func main() {
 		log.Fatal("Error loading .env file: ", err)
 	}
 
-	dsn := os.Getenv("DSN")
+	dsn := os.Getenv("DB_DSN")
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal("[-] Error in opening database: ", err)
